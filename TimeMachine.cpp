@@ -28,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << "t4: " << t4;
 	cout << "t5: " << t5;
 	cout << "t6 after: " << t6;
-	/*TimeSpan dur1(77.4, 15, 6), dur2(127.86), dur3(8, -23, 0), dur4(0, 0, 0);
+	TimeSpan dur1(77.4, 15, 6), dur2(127.86), dur3(8, -23, 0), dur4(0, 0, 0);
 	TimeSpan dur5(-3, 73, 2), dur6(7, 35, 120), dur7, dur8;
 	dur7 = dur1 + dur3;
 	cout << "dur1: " << dur1;
@@ -41,7 +41,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	dur7 += dur3;
 	cout << "dur3: " << dur3;
 	cout << "dur7: " << dur7;
-	if (dur3 != dur6)
+	/*if (dur3 != dur6)
 	{
 		cout << "Durations are different." << endl;
 	}
@@ -60,7 +60,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << (tester1 != tester2) << endl;
 	*/
 
-	cin.get();
 	cin.get();
 
 	return 0;
