@@ -3,106 +3,180 @@
 
 TimeSpan::TimeSpan()
 {
-	Seconds = 0;
-	Minutes = 0;
-	Hours = 0;
+	seconds = 0;
+	minutes = 0;
+	hours = 0;
 }
 
 TimeSpan::TimeSpan(double sec)
 {
-	normalize(0, 0, sec);
+	this->normalize(0, 0, sec);
 }
 
 TimeSpan::TimeSpan(double min, double sec)
 {
-	normalize(0, min, sec);
+	this->normalize(0, min, sec);
 }
 
 TimeSpan::TimeSpan(double hour, double min, double sec)
 {
-	normalize(hour, min, sec);
+	this->normalize(hour, min, sec);
 }
 
 void TimeSpan::normalize(double hour, double min, double sec)
 {
-	int totalSeconds;
+	int totalSeconds, tmpHrs, tmpMin, tmpSec;
 	double remainder, wholeNum;
 
-	//Phase 1: Convert hours to seconds
-	/*
-		double hourRemander = (int)hour / hour;
+	if (hour == 0 && min == 0 && sec == 0)
+	{
+		this->setTime(0, 0, 0);
+	}
+	else
+	{
+		/*
+			remainder = (int)hour / hour;
 
-		Compute remainder from hour -> minute
-		
-		double minRemander = (int)minute / minute;
-		compute remainder from minute -> second
+			Compute remainder from hour -> minute
 
-		double second = (int)second / second;
-	*/
-	remainder = modf(hour, & wholeNum); //wholeNum(hr) = 2hr, remainder = 0.8hr 
-	totalSeconds = (wholeNum * 3600); //totalSec += (2hr * 3600min)
-	wholeNum = (remainder * 60); //wholeNum(min) = (0.8hr * 60min)
+			double minRemainder = (int)minute / minute;
 
-	remainder = modf(wholeNum, & wholeNum); //wholeNum(min) = 52min, remainder 0.88min
-	totalSeconds += (wholeNum * 60); //totalSec += (52min * 60sec) 
-	totalSeconds += (remainder * 60); //totalSec += (0.88min * 60 sec)
+			compute remainder from minute -> second
 
-	//Phase 2: Convert minutes to seconds
-	remainder = modf(min, & wholeNum); //wholeNum(min) = 2min, remainder = 0.8min 
-	totalSeconds += (wholeNum * 60); //totalSec += (2min * 60sec) 
-	totalSeconds += (remainder * 60); // totalSec += (0.8min * 60 sec)
+			double second = (int)second / second;
+		*/
 
-	//Phase 3: Add total seconds
-	totalSeconds += (int) sec; 
+		//Phase 1: Convert hours to minutes and seconds
+		remainder = modf(hour, & wholeNum); //Separate whole hour from its remainder
+		totalSeconds = (wholeNum * SECONDS_PER_HOUR); //Convert, store whole hours to seconds
+		wholeNum = (remainder * MINUTES_PER_HOUR); //Convert, store remainder(hr) to minutes
 
-	//Phase 4: Calculate/store time values 
-	this->Hours = (totalSeconds / 3600);
-	this->Minutes = ((totalSeconds / 60) % 60);
-	this->Seconds = (totalSeconds % 60);
+		//Phase 2: Convert minutes to seconds
+		wholeNum += min;
+		remainder = modf(wholeNum, & wholeNum); //Separate whole minute from its remainder
+		totalSeconds += (wholeNum * SECONDS_PER_MINUTE); //Convert, store whole minutes into seconds
+		totalSeconds += (remainder * SECONDS_PER_MINUTE); //Convert, store remainder(min) to seconds
+
+		//Phase 3: Add total seconds
+		totalSeconds += sec;
+
+		//Phase 4: Calculate/store time values 
+		tmpHrs = (totalSeconds / SECONDS_PER_HOUR);
+		tmpMin = ((totalSeconds / MINUTES_PER_HOUR) % SECONDS_PER_MINUTE);
+		tmpSec = (totalSeconds % SECONDS_PER_MINUTE);
+
+		this->setTime(tmpHrs, tmpMin, tmpSec);
+	}
+
 }
 
 int TimeSpan::getHours() const
 {
-	return this->Hours;
+	return this->hours;
 }
 
 int TimeSpan::getMinutes() const
 {
-	return this->Minutes;
+	return this->minutes;
 }
 
 int TimeSpan::getSeconds() const
 {
-	return this->Seconds;
+	return this->seconds;
 }
 
 void TimeSpan::setHours(int hour)
 {
-	this->normalize(hour, this->Minutes, this->Seconds);
+	this->normalize(hour, this->minutes, this->seconds);
+	
 }
 
 void TimeSpan::setMinutes(int min)
 {
-	this->normalize(this->Hours, min, this->Seconds);
+	this->normalize(this->hours, min, this->seconds);
 }
 
 void TimeSpan::setSeconds(int sec)
 {
-	this->normalize(this->Hours, this->Minutes, sec);
+	this->normalize(this->hours, this->minutes, sec);
 }
 
 bool TimeSpan::setTime(int hours, int minutes, int seconds)
 {
-
-	this->normalize(hours, minutes, seconds);
+	this->hours = hours;
+	this->minutes = minutes; 
+	this->seconds = seconds;
 	return true;
 }
 
-ostream & operator<<(ostream & os, const TimeSpan & ts)
+TimeSpan TimeSpan::operator+(const TimeSpan & time) const
 {
-	cout << "Hours: " << ts.Hours << " Minutes: " << ts.Minutes << " Seconds: " << ts.Seconds << endl;
+	TimeSpan timeSum;
+	int totalHrs, totalMin, totalSec;
+
+	totalHrs = this->hours + time.hours;
+	totalMin = this->minutes + time.minutes;
+	totalSec = this->seconds + time.seconds;
+
+	timeSum.normalize(totalHrs, totalMin, totalSec);
+
+	return timeSum;
+}
+
+TimeSpan TimeSpan::operator-(const TimeSpan & time) const
+{
+	TimeSpan timeDiff;
+	int totalHrs, totalMin, totalSec;
+
+	totalHrs = this->hours - time.hours;
+	totalMin = this->minutes - time.minutes;
+	totalSec = this->seconds - time.seconds;
+
+	timeDiff.normalize(totalHrs, totalMin, totalSec);
+
+	return timeDiff;
+}
+
+TimeSpan TimeSpan::operator+=(const TimeSpan & time)
+{
+	TimeSpan timeSum;
+	int totalHrs, totalMin, totalSec;
+
+	totalHrs = this->hours + time.hours;
+	totalMin = this->minutes + time.minutes;
+	totalSec = this->seconds + time.seconds;
+
+	this->normalize(totalHrs, totalMin, totalSec);
+
+	return timeSum;
+}
+
+TimeSpan TimeSpan::operator-=(const TimeSpan & time)
+{
+	TimeSpan timeDiff;
+	int totalHrs, totalMin, totalSec;
+
+	totalHrs = this->hours - time.hours;
+	totalMin = this->minutes - time.minutes;
+	totalSec = this->seconds - time.seconds;
+
+	this->normalize(totalHrs, totalMin, totalSec);
+
+	return timeDiff;
+}
+
+ostream & operator<<(ostream & os, const TimeSpan & time)
+{
+	os << "Hours: " << time.hours << " Minutes: " << time.minutes << " Seconds: " << time.seconds << endl;
 	return os;
 }
+
+istream & operator>>(istream & is, const TimeSpan & time)
+{
+	is >> time.hours >> time.minutes >> time.seconds;
+	return is;
+}
+
 
 TimeSpan::~TimeSpan()
 {
